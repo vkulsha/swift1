@@ -9,12 +9,32 @@
 import UIKit
 
 class InfoTableViewController: UITableViewController {
-    var modelArray = [String]()
+    var modelArray = [[String?]]()
+    
+    func reloadData(_ id: String = "1") {
+        let url = URL(string: "http://kulsha.ru/php/olp.php?f=gAnd&p=[[\(id)]]&u=41000")!
+        let task = URLSession.shared.dataTask(with: url) {(data, response, error) in
+            guard let data = data else { return }
+            do {
+                let json = try JSONDecoder().decode([[String?]].self, from: data)
+                self.modelArray = json
+                self.tableView.reloadData()
+ 
+            } catch let error {
+                print(error)
+            }
+            
+        }
+        task.resume()
+
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
- 
-        // Uncomment the following line to preserve selection between presentations
+        self.tableView.register(TableViewCell.self, forCellReuseIdentifier: "InfoCell")
+        reloadData()
+
+       // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
@@ -35,12 +55,17 @@ class InfoTableViewController: UITableViewController {
 
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "InfoCell", for: indexPath)
-        cell.textLabel?.text = modelArray[indexPath.row]
+        let cell: TableViewCell = tableView.dequeueReusableCell(withIdentifier: "InfoCell", for: indexPath) as! TableViewCell
+        cell.id = modelArray[indexPath.row][0] ?? ""
+        cell.n = modelArray[indexPath.row][1] ?? ""
+        cell.textLabel?.text = modelArray[indexPath.row][1] ?? ""
         return cell
     }
     
-
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let cell = tableView.cellForRow(at: indexPath) as! TableViewCell
+        reloadData(cell.id)
+    }
     /*
     // Override to support conditional editing of the table view.
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
