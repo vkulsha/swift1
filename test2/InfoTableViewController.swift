@@ -18,7 +18,9 @@ class InfoTableViewController: UITableViewController {
             do {
                 let json = try JSONDecoder().decode([[String?]].self, from: data)
                 self.modelArray = json
-                self.tableView.reloadData()
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
  
             } catch let error {
                 print(error)
